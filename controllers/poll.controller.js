@@ -4,6 +4,10 @@ const { getSocketIo } = require("../config/socket");
 const createPoll = async (req, res) => {
     try {
         const { question, options } = req.body;
+        const existingPoll = await Poll.findOne({ question });
+        if (existingPoll) {
+            return res.status(400).json({ error: "A poll with this question already exists." });
+        }
         const poll = new Poll({ question, options });
         await poll.save();
         return res.status(201).json(poll);
@@ -24,7 +28,7 @@ const getPoll = async (req, res) => {
 
 const getAllPolls = async (req, res) => {
     try {
-        const polls = await Poll.findOne({});
+        const polls = await Poll.find();
         if (!polls) return res.status(404).json({ error: "Polls not found" });
         return res.json(polls);
     } catch (err) {
